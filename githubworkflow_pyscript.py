@@ -14,7 +14,8 @@ def increment_version(version):
 # Fetch versions from environment variables or file
 latest_version = os.getenv('LATEST_VERSION', '1.0.0')
 current_version = os.getenv('CURRENT_VERSION', '1.0.0')
-
+print(latest_version)
+print(current_version)
 if latest_version != current_version:
     print("New version available!")
     print('Hello World!!!')
