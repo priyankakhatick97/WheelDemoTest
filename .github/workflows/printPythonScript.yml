@@ -21,7 +21,7 @@ jobs:
         env:
           LATEST_VERSION: '${{ env.CURRENT_VERSION }}'
         run: |
-          python check_update.py
+          python githubworkflow_pyscript.py
       - name: Update version file
         run: >
           echo "${{ steps.read_version.outputs.NEW_VERSION }}" > version.txt
