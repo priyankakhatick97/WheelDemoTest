@@ -4,7 +4,8 @@ import re
 
 def increment_version(version):
     # Split the version into parts
-    parts = list(map(int, version.split('.')))
+    part =  list((version.split('.')))
+    parts = [int(i) for i in part]
     # Increment the last part (patch version)
     parts[-1] += 1
     # Join the parts back into a string
