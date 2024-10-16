@@ -17,6 +17,7 @@ current_version = os.getenv('CURRENT_VERSION', '1.0.0')
 
 if latest_version != current_version:
     print("New version available!")
+    print('Hello World!!!')
 else:
     print("No new update.")
 
