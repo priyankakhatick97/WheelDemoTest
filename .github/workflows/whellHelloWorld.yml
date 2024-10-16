@@ -25,6 +25,11 @@ jobs:
       - name: Generate Wheel File
         run: |
           python setup.py bdist_wheel
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "priyanka.khatick@tigeranalytics.com"
+          git config --global user.name "priyankakhatick97"
           
       - name: Commit and push wheel
         run: |
