@@ -28,7 +28,7 @@ jobs:
           git config --local user.name "priyankakhatick97"
 
           #Read the version file
-          new_version=$(cat version.txt)
+          $new_version = Get-Content version.txt
           
           git add version.txt
           git commit -m "Increment version to $new_version"   # Commit the new version
