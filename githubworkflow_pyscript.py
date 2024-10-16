@@ -11,11 +11,13 @@ def increment_version(version):
     # Join the parts back into a string
     return '.'.join(map(str, parts))
 
+
 # Fetch versions from environment variables or file
-latest_version = os.getenv('LATEST_VERSION', '1.0.0')
-current_version = os.getenv('CURRENT_VERSION', '1.0.0')
-print(latest_version)
-print(current_version)
+latest_version = '1.0.0'
+current_version = '1.0.0'
+print(f"Latest Version: {latest_version}")
+print(f"Current Version: {current_version}")
+
 if latest_version != current_version:
     print("New version available!")
     print('Hello World!!!')
@@ -25,3 +27,4 @@ else:
 # Increment the latest version for the next push
 new_version = increment_version(latest_version)
 print(f"New version set to: {new_version}")
+
