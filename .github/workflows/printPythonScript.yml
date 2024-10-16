@@ -18,26 +18,6 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Read current version
-        id: read_version
-        run: |
-          set CURRENT_VERSION=$(type version.txt)  # Use 'type' for Windows
-          echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
-
       - name: Run githubworkflow_pyscript.py
-        env:
-          LATEST_VERSION: ${{ env.CURRENT_VERSION }}
         run: |
           python githubworkflow_pyscript.py
-
-      - name: Update version file
-        run: |
-          echo "${{ env.LATEST_VERSION }}" > version.txt  # Use the correct variable
-
-          git config --local user.email "priyanka.khatick@tigeranalytics.com"
-          git config --local user.name "priyankakhatick97"
-
-          git add version.txt
-
-          git commit -m "Increment version to ${{ env.LATEST_VERSION }}"
-          git push
