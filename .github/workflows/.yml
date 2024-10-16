@@ -1,0 +1,32 @@
+name: Check for Updates and Increment Version Final here actual version changing happned 
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-update:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Run githubworkflow_versionchange.py
+        run: |
+          python githubworkflow_versionchange.py
+
+      - name: Update version file
+        run: |
+          git config --local user.email "priyanka.khatick@tigeranalytics.com"
+          git config --local user.name "priyankakhatick97"
+
+          git add version.txt
+          git commit -m "Increment version to $(<version.txt)"  # Commit the new version
+          git push
