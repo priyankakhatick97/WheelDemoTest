@@ -26,7 +26,5 @@ jobs:
         run: |
           python setup.py bdist_wheel
 
-      - name: Print Hello World
-        run: |
-          pip install dist/hello_world-0.1-py3-none-any.whl
-          python -c "import hello_world; hello_world.print_hello()"
+
+   
