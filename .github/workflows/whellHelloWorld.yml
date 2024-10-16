@@ -1,0 +1,32 @@
+name: Generate Wheel File and hello world
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install setuptools and wheel
+        run: |
+          pip install setuptools wheel
+
+      - name: Generate Wheel File
+        run: |
+          python setup.py bdist_wheel
+
+      - name: Print Hello World
+        run: |
+          pip install dist/hello_world-0.1-py3-none-any.whl
+          python -c "import hello_world; hello_world.print_hello()"
