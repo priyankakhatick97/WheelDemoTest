@@ -1,4 +1,4 @@
-name: Check for Updates and Increment Version
+name: Check for python script and run py
 
 on:
   push:
