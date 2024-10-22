@@ -29,60 +29,67 @@ jobs:
           import re
           import os
           import subprocess
-          
-          with open('hello_world/__init__.py', 'r') as f:
-              content = f.read()
-          
-          version_match = re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', content)
-          if version_match:
-              version = version_match.group(1)
-              print(f"Current version from __init__.py: {version}")
-              with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-                  env_file.write(f"VERSION={version}\n")
-          else:
-              raise ValueError("Version not found in __init__.py")
+
+          try:
+              # Read current version
+              with open('hello_world/__init__.py', 'r') as f:
+                  content = f.read()
               
-          # Get the commit message
-          commit_message = subprocess.check_output(
-              ['git', 'log', '-1', '--pretty=%B'],
-              universal_newlines=True
-          ).strip()
-          print(f"Commit message: {commit_message}")
+              version_match = re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', content)
+              if not version_match:
+                  raise ValueError("Version not found in __init__.py")
+              
+              # Get the current version and print it
+              current_version = version_match.group(1)
+              print(f"Current version from __init__.py: {current_version}")
 
-          # Parse current version
-          major, minor, patch = map(int, current_version.split('.'))
+              # Get last commit message
+              commit_message = subprocess.check_output(
+                  ['git', 'log', '-1', '--pretty=%B'],
+                  universal_newlines=True
+              ).strip()
+              print(f"Commit message: {commit_message}")
 
-          # Update version based on commit message
-          if 'build:' in commit_message:
-              major += 1
-              minor = 0
-              patch = 0
-          elif 'feature:' in commit_message:
-              minor += 1
-              patch = 0
-          elif 'fix:' in commit_message:
-              patch += 1
-          else:
-              print("No version keyword found. Using patch bump as default.")
-              patch += 1
+              try:
+                  # Parse current version
+                  major, minor, patch = map(int, current_version.split('.'))
+                  
+                  # Update version based on commit message
+                  if 'build:' in commit_message:
+                      major += 1
+                      minor = 0
+                      patch = 0
+                  elif 'feature:' in commit_message:
+                      minor += 1
+                      patch = 0
+                  elif 'fix:' in commit_message:
+                      patch += 1
+                  else:
+                      print("No version keyword found. Using patch bump as default.")
+                      patch += 1
 
-          new_version = f"{major}.{minor}.{patch}"
-          print(f"New version will be: {new_version}")
+                  new_version = f"{major}.{minor}.{patch}"
+                  print(f"New version will be: {new_version}")
 
-          # Update __init__.py with new version
-          with open('hello_world/__init__.py', 'r') as f:
-              content = f.read()
-          
-          new_content = re.sub(
-              r'version\s*=\s*[\'\"](.*?)[\'\"]',
-              f'version = "{new_version}"',
-              content
-          )
-          
-          with open('hello_world/__init__.py', 'w') as f:
-              f.write(new_content)
+                  # Update __init__.py with new version
+                  new_content = re.sub(
+                      r'version\s*=\s*[\'\"](.*?)[\'\"]',
+                      f'version = "{new_version}"',
+                      content
+                  )
+                  
+                  with open('hello_world/__init__.py', 'w') as f:
+                      f.write(new_content)
 
-          # Set environment variables
-          with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-              env_file.write(f"VERSION={new_version}\n")
-              env_file.write(f"CURRENT_VERSION={current_version}\n")
+                  # Set environment variables
+                  with open(os.environ['GITHUB_ENV'], 'a') as f:
+                      f.write(f"VERSION={new_version}\n")
+                      f.write(f"CURRENT_VERSION={current_version}\n")
+
+              except ValueError as e:
+                  print(f"Error parsing version number: {e}")
+                  raise
+
+          except Exception as e:
+              print(f"An error occurred: {e}")
+              raise
