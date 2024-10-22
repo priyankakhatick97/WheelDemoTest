@@ -64,9 +64,11 @@ jobs:
           echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
           echo "New version will be: $new_version"
 
+      - name: Update versions in init file
+        run: |
           # Update version in __init__.py
           $init_content = Get-Content hello_world/__init__.py -Raw
-          $new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.*?)[\'"]', "version = '$env:NEW_VERSION'"
+          $new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.+?)[\'"]', "__version__ = '$env:NEW_VERSION'"
           Set-Content hello_world/__init__.py -Value $new_init_content
 
       - name: Generate Wheel File
