@@ -32,10 +32,10 @@ jobs:
           with open('hello_world/__init__.py', 'r') as f:
               content = f.read()
           
-          version_match = re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', content)
+          version_match = re.search(r'__version__\s*=\s*[\'\"](.*?)[\'\"]', content)
           if version_match:
               version = version_match.group(1)
-              print(f"Current version from __init__.py: {version}")
+              print(f"Current version from __init__.py: {__version__}")
               with open(os.environ['GITHUB_ENV'], 'a') as env_file:
                   env_file.write(f"VERSION={version}\n")
           else:
