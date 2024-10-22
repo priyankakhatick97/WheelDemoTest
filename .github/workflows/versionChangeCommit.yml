@@ -65,9 +65,9 @@ jobs:
           echo "New version will be: $new_version"
 
           # Update version in __init__.py
-          $init_content = Get-Content your_package_name/__init__.py -Raw
+          $init_content = Get-Content hello_world/__init__.py -Raw
           $new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.*?)[\'"]', "version = '$env:NEW_VERSION'"
-          Set-Content your_package_name/__init__.py -Value $new_init_content
+          Set-Content hello_world/__init__.py -Value $new_init_content
 
       - name: Generate Wheel File
         run: |
