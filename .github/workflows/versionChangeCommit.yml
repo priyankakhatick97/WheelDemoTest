@@ -37,27 +37,30 @@ jobs:
           echo "Commit message: $commit_message"
           
           # Parse current version
-          #IFS='.' read -r major minor patch <<< "$init_version"
+          $version_parts = $init_version.Split('.')
+          $major = [int]$version_parts[0]
+          $minor = [int]$version_parts[1]
+          $patch = [int]$version_parts[2]
           
           # Update version based on commit message
-          if [[ $commit_message == *"build:"* ]]; then
-              major=$((major + 1))
-              minor=0
-              patch=0
-          elif [[ $commit_message == *"feature:"* ]]; then
-              minor=$((minor + 1))
-              patch=0
-          elif [[ $commit_message == *"fix:"* ]]; then
-              patch=$((patch + 1))
-          else
-              echo "No version keyword found. Using patch bump as default."
-              patch=$((patch + 1))
-          fi
+          if ($commit_message -match "build:") {
+              $major += 1
+              $minor = 0
+              $patch = 0
+          } elseif ($commit_message -match "feature:") {
+              $minor += 1
+              $patch = 0
+          } elseif ($commit_message -match "fix:") {
+              $patch += 1
+          } else {
+              Write-Host "No version keyword found. Using patch bump as default."
+              $patch += 1
+          }
           
-          new_version="$major.$minor.$patch"
-          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+          $new_version = "$major.$minor.$patch"
+          echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
           echo "New version will be: $new_version"
-
+          
       - name: Update version in __init__.py
         run: |
           # Update version in __init__.py
