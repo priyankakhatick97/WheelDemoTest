@@ -32,44 +32,38 @@ jobs:
           echo "Current version from __init__.py: $init_version"
           echo "VERSION=$init_version" >> $GITHUB_ENV
           
-          # Use version from __init__.py as source of truth
-          $current_version = $init_version
-          
           # Get the commit message
-          $commit_message = git log -1 --pretty=%B
+          commit_message=$(git log -1 --pretty=%B)
           echo "Commit message: $commit_message"
           
           # Parse current version
-          $version_parts = $current_version.Split('.')
-          $major = [int]$version_parts[0]
-          $minor = [int]$version_parts[1]
-          $patch = [int]$version_parts[2]
+          IFS='.' read -r major minor patch <<< "$init_version"
           
           # Update version based on commit message
-          if ($commit_message -match "build:") {
-              $major += 1
-              $minor = 0
-              $patch = 0
-          } elseif ($commit_message -match "feature:") {
-              $minor += 1
-              $patch = 0
-          } elseif ($commit_message -match "fix:") {
-              $patch += 1
-          } else {
-              Write-Host "No version keyword found. Using patch bump as default."
-              $patch += 1
-          }
+          if [[ $commit_message == *"build:"* ]]; then
+              major=$((major + 1))
+              minor=0
+              patch=0
+          elif [[ $commit_message == *"feature:"* ]]; then
+              minor=$((minor + 1))
+              patch=0
+          elif [[ $commit_message == *"fix:"* ]]; then
+              patch=$((patch + 1))
+          else
+              echo "No version keyword found. Using patch bump as default."
+              patch=$((patch + 1))
+          fi
           
-          $new_version = "$major.$minor.$patch"
-          echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
+          new_version="$major.$minor.$patch"
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
           echo "New version will be: $new_version"
 
-      #- name: Update versions in init file
-       # run: |
-        #  # Update version in __init__.py
-         # $init_content = Get-Content hello_world/__init__.py -Raw
-          #$new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.+?)[\'"]', "__version__ = '$env:NEW_VERSION'"
-          #Set-Content hello_world/__init__.py -Value $new_init_content
+      - name: Update version in __init__.py
+        run: |
+          # Update version in __init__.py
+          $init_content = Get-Content hello_world/__init__.py -Raw
+          $new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.+?)[\'"]', "__version__ = '$env:NEW_VERSION'"
+          Set-Content hello_world/__init__.py -Value $new_init_content
 
       - name: Generate Wheel File
         run: |
@@ -84,7 +78,7 @@ jobs:
         run: |
           git pull
           git add setup.py
-          git add your_package_name/__init__.py
+          git add hello_world/__init__.py
           git add -f ./dist/*.whl
           git commit -m "Release version $env:NEW_VERSION"
           git tag -a "v$env:NEW_VERSION" -m "Version $env:NEW_VERSION"
