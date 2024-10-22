@@ -28,6 +28,7 @@ jobs:
         run: |
           import re
           import os
+          import subprocess
           
           with open('hello_world/__init__.py', 'r') as f:
               content = f.read()
@@ -42,30 +43,46 @@ jobs:
               raise ValueError("Version not found in __init__.py")
               
           # Get the commit message
-          commit_message=$(git log -1 --pretty=%B)
-          echo "Commit message: $commit_message"
-          
+          commit_message = subprocess.check_output(
+              ['git', 'log', '-1', '--pretty=%B'],
+              universal_newlines=True
+          ).strip()
+          print(f"Commit message: {commit_message}")
+
           # Parse current version
-          $version_parts = $init_version.Split('.')
-          $major = [int]$version_parts[0]
-          $minor = [int]$version_parts[1]
-          $patch = [int]$version_parts[2]
-          
+          major, minor, patch = map(int, current_version.split('.'))
+
           # Update version based on commit message
-          if ($commit_message -match "build:") {
-              $major += 1
-              $minor = 0
-              $patch = 0
-          } elseif ($commit_message -match "feature:") {
-              $minor += 1
-              $patch = 0
-          } elseif ($commit_message -match "fix:") {
-              $patch += 1
-          } else {
-              Write-Host "No version keyword found. Using patch bump as default."
-              $patch += 1
-          }
+          if 'build:' in commit_message:
+              major += 1
+              minor = 0
+              patch = 0
+          elif 'feature:' in commit_message:
+              minor += 1
+              patch = 0
+          elif 'fix:' in commit_message:
+              patch += 1
+          else:
+              print("No version keyword found. Using patch bump as default.")
+              patch += 1
+
+          new_version = f"{major}.{minor}.{patch}"
+          print(f"New version will be: {new_version}")
+
+          # Update __init__.py with new version
+          with open('hello_world/__init__.py', 'r') as f:
+              content = f.read()
           
-          $new_version = "$major.$minor.$patch"
-          echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
-          echo "New version will be: $new_version"
+          new_content = re.sub(
+              r'version\s*=\s*[\'\"](.*?)[\'\"]',
+              f'version = "{new_version}"',
+              content
+          )
+          
+          with open('hello_world/__init__.py', 'w') as f:
+              f.write(new_content)
+
+          # Set environment variables
+          with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+              env_file.write(f"VERSION={new_version}\n")
+              env_file.write(f"CURRENT_VERSION={current_version}\n")
