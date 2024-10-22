@@ -33,7 +33,7 @@ jobs:
           git pull
           git add -f ./dist/*.whl
           git commit -m 'pushing new wheel'
-          git push
+          # git push
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
