@@ -1,0 +1,89 @@
+name: Generate Wheel File and Version Control with commit message
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install setuptools and wheel
+        run: |
+          pip install setuptools wheel
+
+      - name: Calculate new version
+        id: version
+        run: |
+          # Get the current version from __init__.py
+          $init_version = python -c "import re; f = open('hello_world/__init__.py', 'r').read(); print(re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))"
+          echo "Current version from __init__.py: $init_version"
+          
+          
+          # Use version from __init__.py as source of truth
+          $current_version = $init_version
+          
+          # Get the commit message
+          $commit_message = git log -1 --pretty=%B
+          echo "Commit message: $commit_message"
+          
+          # Parse current version
+          $version_parts = $current_version.Split('.')
+          $major = [int]$version_parts[0]
+          $minor = [int]$version_parts[1]
+          $patch = [int]$version_parts[2]
+          
+          # Update version based on commit message
+          if ($commit_message -match "build:") {
+              $major += 1
+              $minor = 0
+              $patch = 0
+          } elseif ($commit_message -match "feature:") {
+              $minor += 1
+              $patch = 0
+          } elseif ($commit_message -match "fix:") {
+              $patch += 1
+          } else {
+              Write-Host "No version keyword found. Using patch bump as default."
+              $patch += 1
+          }
+          
+          $new_version = "$major.$minor.$patch"
+          echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
+          echo "New version will be: $new_version"
+
+          # Update version in __init__.py
+          $init_content = Get-Content your_package_name/__init__.py -Raw
+          $new_init_content = $init_content -replace 'version\s*=\s*[\'"](.*?)[\'"]', "version = '$env:NEW_VERSION'"
+          Set-Content your_package_name/__init__.py -Value $new_init_content
+
+      - name: Generate Wheel File
+        run: |
+          python setup.py bdist_wheel
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "priyanka.khatick@tigeranalytics.com"
+          git config --global user.name "priyankakhatick97"
+          
+      - name: Commit and push wheel
+        run: |
+          git pull
+          git add setup.py
+          git add your_package_name/__init__.py
+          git add -f ./dist/*.whl
+          git commit -m "Release version $env:NEW_VERSION"
+          git tag -a "v$env:NEW_VERSION" -m "Version $env:NEW_VERSION"
+          git push --follow-tags
