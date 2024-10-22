@@ -27,62 +27,7 @@ jobs:
       - name: Calculate new version
         id: version
         run: |
-          # Get the current version from __init__.py
-          init_version=$(python -c "import re; f=open('hello_world/__init__.py').read(); print(re.search(r'__version__\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))")
-          echo "Current version from __init__.py: $init_version"
-          echo "VERSION=$init_version" >> $GITHUB_ENV
+           $init_version = python -c "import re; f=open('hello_world/__init__.py').read(); print(re.search(r'__version__\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))"
+            echo "Current version from __init__.py: $init_version"
+            echo "VERSION=$init_version" >> $GITHUB_ENV
           
-          # Get the commit message
-          commit_message=$(git log -1 --pretty=%B)
-          echo "Commit message: $commit_message"
-          
-          # Parse current version
-          $version_parts = $init_version.Split('.')
-          $major = [int]$version_parts[0]
-          $minor = [int]$version_parts[1]
-          $patch = [int]$version_parts[2]
-          
-          # Update version based on commit message
-          if ($commit_message -match "build:") {
-              $major += 1
-              $minor = 0
-              $patch = 0
-          } elseif ($commit_message -match "feature:") {
-              $minor += 1
-              $patch = 0
-          } elseif ($commit_message -match "fix:") {
-              $patch += 1
-          } else {
-              Write-Host "No version keyword found. Using patch bump as default."
-              $patch += 1
-          }
-          
-          $new_version = "$major.$minor.$patch"
-          echo "NEW_VERSION=$new_version" >> $env:GITHUB_ENV
-          echo "New version will be: $new_version"
-          
-      - name: Update version in __init__.py
-        run: |
-          # Update version in __init__.py
-          $init_content = Get-Content hello_world/__init__.py -Raw
-          $new_init_content = $init_content -replace '__version__\s*=\s*[\'"](.+?)[\'"]', "__version__ = '$env:NEW_VERSION'"
-          Set-Content hello_world/__init__.py -Value $new_init_content
-
-      - name: Generate Wheel File
-        run: |
-          python setup.py bdist_wheel
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "priyanka.khatick@tigeranalytics.com"
-          git config --global user.name "priyankakhatick97"
-          
-      - name: Commit and push wheel
-        run: |
-          git pull
-          git add setup.py
-          git add hello_world/__init__.py
-          git add -f ./dist/*.whl
-          git commit -m "Release version $env:NEW_VERSION"
-          git tag -a "v$env:NEW_VERSION" -m "Version $env:NEW_VERSION"
-          git push --follow-tags
