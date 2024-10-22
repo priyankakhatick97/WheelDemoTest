@@ -37,7 +37,7 @@ jobs:
           echo "Commit message: $commit_message"
           
           # Parse current version
-          IFS='.' read -r major minor patch <<< "$init_version"
+          #IFS='.' read -r major minor patch <<< "$init_version"
           
           # Update version based on commit message
           if [[ $commit_message == *"build:"* ]]; then
