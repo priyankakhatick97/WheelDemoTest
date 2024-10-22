@@ -4,7 +4,7 @@ import hello_world
 
 setup(
   name='Myhelloworld',
-  version=hello_world.__version__,
+  version=hello_world.version,
   author=hello_world.__author__,
   url='https://databricks.com',
   author_email='john.doe@databricks.com',
