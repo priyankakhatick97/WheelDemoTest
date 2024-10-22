@@ -1,5 +1,4 @@
-name: Generate Wheel File and Version Control with commit message
-
+name: Generate Wheel File and Version Control
 on:
   push:
     branches:
@@ -8,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -18,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: '3.x'
 
       - name: Install setuptools and wheel
         run: |
@@ -26,9 +24,21 @@ jobs:
 
       - name: Calculate new version
         id: version
+        shell: python
         run: |
-            #Get the current version from __init__.py
-            $init_version = python -c "import re; f = open('hello_world/__init__.py', 'r').read(); print(re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))"
-            echo "Current version from __init__.py: $init_version"
-            echo "VERSION=$init_version" >> $GITHUB_ENV
+          import re
+          import os
           
+          with open('hello_world/__init__.py', 'r') as f:
+              content = f.read()
+          
+          version_match = re.search(r'version\s*=\s*[\'\"](.*?)[\'\"]', content)
+          if version_match:
+              version = version_match.group(1)
+              print(f"Current version from __init__.py: {version}")
+              with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+                  env_file.write(f"VERSION={version}\n")
+          else:
+              raise ValueError("Version not found in __init__.py")
+
+      
