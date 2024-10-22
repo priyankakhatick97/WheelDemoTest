@@ -93,3 +93,24 @@ jobs:
           except Exception as e:
               print(f"An error occurred: {e}")
               raise
+
+      - name: Generate Wheel File
+        run: |
+          python setup.py bdist_wheel
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "priyanka.khatick@tigeranalytics.com"
+          git config --global user.name "priyankakhatick97"
+          
+      - name: Commit and push wheel
+        run: |
+          git pull
+          git add setup.py
+          git add hello_world/__init__.py
+          git add -f ./dist/*.whl
+          git commit -m "Release version $env:NEW_VERSION"
+          git tag -a "v$env:NEW_VERSION" -m "Version $env:NEW_VERSION"
+          git push --follow-tags
+
+     
