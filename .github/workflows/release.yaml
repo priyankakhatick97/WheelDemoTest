@@ -32,16 +32,6 @@ jobs:
         run: |
           python setup.py sdist bdist_wheel
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref }}  # This gets the tag name (e.g., refs/tags/v1.0.0)
-          files: |
-            dist/*.tar.gz
-            dist/*.whl
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get Base Branch
         id: get_branch
         run: |
@@ -63,3 +53,14 @@ jobs:
           git push origin ${{ steps.get_branch.outputs.branch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the token for authentication
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}  # This gets the tag name (e.g., refs/tags/v1.0.0)
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
