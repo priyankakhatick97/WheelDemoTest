@@ -28,7 +28,7 @@ jobs:
         id: version
         run: |
           # Get the current version from __init__.py
-          $init_version = python -c "import re; f = open('hello_world/__init__.py', 'r').read(); print(re.search(r'__version__\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))"
+          init_version=$(python -c "import re; f=open('hello_world/__init__.py').read(); print(re.search(r'__version__\s*=\s*[\'\"](.*?)[\'\"]', f).group(1))")
           echo "Current version from __init__.py: $init_version"
           
           
